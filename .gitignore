@@ -5,3 +5,6 @@ __pycache__/language_operations.cpython-39.pyc
 __pycache__/list_operations.cpython-39.pyc
 __pycache__/vbcode.cpython-39.pyc
 __pycache__/vsm.cpython-39.pyc
+dictionary.txt
+lengths.txt
+postings.txt
