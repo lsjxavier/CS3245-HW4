@@ -8,3 +8,4 @@ __pycache__/vsm.cpython-39.pyc
 dictionary.txt
 lengths.txt
 postings.txt
+dataset/dataset.csv

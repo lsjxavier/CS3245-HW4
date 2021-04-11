@@ -4,7 +4,7 @@ import getopt
 import sys
 import time
 
-import boolean_retrival
+import boolean_retrieval
 import file_operations
 import list_operations
 import language_operations
