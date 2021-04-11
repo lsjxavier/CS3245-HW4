@@ -39,10 +39,10 @@ def run_search(dict_file, postings_file, queries_file, results_file):
     boolean_query, vsm_query = language_operations.parse_query(query, dictionary)
 
     # Prepare boolean query for evaluation
-    rpn = boolean_retrival.create_rpn(boolean_query)
+    rpn = boolean_retrieval.create_rpn(boolean_query)
 
     # Evaluate boolean query
-    boolean_result = boolean_retrival.eval_rpn(rpn, dictionary, N)
+    boolean_result = boolean_retrieval.eval_rpn(rpn, dictionary, N)
     boolean_result.sort()
 
     valid_docs = list_operations.union(valid_docs, boolean_result)

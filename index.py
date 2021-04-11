@@ -24,16 +24,16 @@ def build_index(in_data, out_dict, out_postings):
     # This is an empty method
     # Pls implement your code in below
 
-    start = time.process_time()
+    indexing_start_time = time.process_time()
     file_operations.init_indexing(out_dict, out_postings)
 
-    doc_id_map = {}      # The initial dictionary containing doc_id - term mappings
-    block_map = {}       # Contains term - block_id mappings for merging
-    lengths_map = {}     # Contains doc_id - doc_length mappings
+    term_map = {}              # Contains postings list in python dict format
+    block_map = {}             # Contains term - block_id mappings for merging
+    lengths_map = {}           # Contains doc_id - doc_length mappings
 
-    block_size = 250     # Maximum number of documents to store in each block
-    block_id = 1         # ID of current block
-    doc_counter = 0      # Counter for block separation
+    SPIMI_BLOCK_SIZE = 500     # Maximum number of documents to store in each block
+    block_id = 1               # ID of current block
+    doc_counter = 0            # Counter for block separation
 
     csvfile = open(in_data, 'r', encoding='utf-8')
     csvdata = csv.DictReader(csvfile, delimiter=',', quotechar='\"')
@@ -46,14 +46,13 @@ def build_index(in_data, out_dict, out_postings):
         content = row["content"]
 
         print('Processing document', doc_id)
-        
-        doc_id_map[doc_id] = language_operations.process_document(doc_id, content)
+        language_operations.process_document(doc_id, content, term_map, lengths_map)
 
-        if doc_counter == block_size:
-            file_operations.write_block(block_id, doc_id_map, block_map, lengths_map)
+        if doc_counter == SPIMI_BLOCK_SIZE:
+            file_operations.write_block(block_id, term_map, block_map, lengths_map)
             block_id += 1
             doc_counter = 0
-            doc_id_map = {}
+            term_map = {}
 
         # FOR DEBUGGING PURPOSES: RETURN A SMALL SUBSET OF THE COLLECTION
         # if block_id == 3: break
@@ -61,8 +60,7 @@ def build_index(in_data, out_dict, out_postings):
     csvfile.close()
 
     # WRITE THE LAST BLOCK
-    file_operations.write_block(block_id, doc_id_map, block_map, lengths_map)
-    # doc_id_map = {}
+    file_operations.write_block(block_id, term_map, block_map, lengths_map)
 
     # MERGE THE BLOCKS
     print('Merging blocks...')
@@ -72,7 +70,11 @@ def build_index(in_data, out_dict, out_postings):
     file_operations.flush_temp_dirs()
 
     print('===================================')
-    print('Time Elapsed: ' + str(time.process_time() - start) + 's')
+    indexing_end_time = time.process_time()
+    indexing_time_elapsed = indexing_end_time - indexing_start_time
+    with open('indexing_log.txt', 'w') as f: f.write(str(indexing_time_elapsed) + '\n')
+    print('Time Elapsed: ' + str(indexing_time_elapsed) + 's')
+
 
 # ============================================================================
 

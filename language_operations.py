@@ -7,13 +7,13 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 import vsm
 
 stemmer = PorterStemmer()
+def process_document(doc_id, content, term_map, lengths_map):
+    # Opens a file, processes the file and returns a term mapping and document length mapping:
 
-def process_document(doc_id, content):
-    # Opens a file, processes the file and returns a tuple:
-    # Element 0: dict -> K: term
-    #                    V: (tf, [pos_idx])
-    # Element 1: doc_length_squared
-    doc_terms = [{}, 0]
+    doc_terms = {}
+    # K: term
+    # V: (tf, [pos_idx])
+    
     stripped_content = re.sub('[^a-zA-Z]',   # Search for all non-letters
                               ' ',           # Replace all non-letters with space
                               str(content))
@@ -24,46 +24,30 @@ def process_document(doc_id, content):
     for sentence in sentences:
         tokens = word_tokenize(sentence)
         for token in tokens:
-                term = stemmer.stem(token.lower())
-                if term in doc_terms[0]:
-                    doc_terms[0][term][0] += 1
-                    doc_terms[0][term][1].append(position_idx)
-                else:
-                    doc_terms[0][term] = [1, [position_idx]]
-
-                position_idx += 1
-    
-    doc_terms[1] = vsm.compute_length_squared([vsm.compute_log_term_freq(val[0]) for val in doc_terms[0].values()])
-    return doc_terms
-
-def get_term_postings(doc_id_map):
-    # Convert a doc_id-orientated array of dictionaries to a term-orientated dictionary
-    # doc_id_map:
-    #     K: doc_id
-    #     V: doc_id_tuple (see below)
-
-    term_map = {}
-    # K: term
-    # V: Element 0: df
-    #    Element 1:
-    #        [  Element 0: doc_id
-    #           Element 1: (tf, [pos_idx]) ]
-    
-    for doc_id in doc_id_map:
-        doc_id_tuple = doc_id_map[doc_id]
-        # doc_id_tuple:
-        #     Element 0: dict -> K: term 
-        #                        V: (tf, [pos_idx])
-        #     Element 1: doc_length_squared
-
-        for term in doc_id_tuple[0]:
-            if term in term_map:
-                term_map[term][0] += 1
-                term_map[term][1].append((doc_id, doc_id_tuple[0][term]))
+            term = stemmer.stem(token.lower())
+            if term in doc_terms:
+                doc_terms[term][0] += 1
+                doc_terms[term][1].append(position_idx)
             else:
-                term_map[term] = [1, [(doc_id, doc_id_tuple[0][term])]]
-    
-    return term_map
+                doc_terms[term] = [1, [position_idx]]
+                
+                # term_map:
+                # K: term
+                # V: Element 0: df
+                #    Element 1:
+                #        [  Element 0: doc_id
+                #           Element 1: (tf, [pos_idx]) ]
+                if term in term_map:
+                    term_map[term][0] += 1
+                    term_map[term][1].append((doc_id, doc_terms[term]))
+                else:
+                    term_map[term] = [1, [(doc_id, doc_terms[term])]]
+            
+            position_idx += 1
+
+    lengths_map[doc_id] = vsm.compute_length_squared([vsm.compute_log_term_freq(val[0]) for val in doc_terms.values()])
+
+
 
 # Assume that the given input string is a boolean query.
 # Insert OR operators between two words if it is not part of a phrasal query,

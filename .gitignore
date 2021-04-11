@@ -9,3 +9,5 @@ dictionary.txt
 lengths.txt
 postings.txt
 dataset/dataset.csv
+indexing_log.txt
+output-test.txt
