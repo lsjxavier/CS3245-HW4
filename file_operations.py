@@ -138,8 +138,8 @@ def write_block(block_id, doc_id_map, block_map, lengths_map):
     posting_seek_ptr = 0 # to be written to dict file
     dict_seek_ptr = 0 # to be written to block mapping
 
-    config.dict_file = open(block_dict, 'w')
-    posting_file = open(block_postings, 'wb')
+    bdf = open(block_dict, 'w')
+    bpf = open(block_postings, 'wb')
     
     for term in term_map:
         df = term_map[term][0]
@@ -156,7 +156,7 @@ def write_block(block_id, doc_id_map, block_map, lengths_map):
                 postings = postings + (' ' + str(index))
 
         # Apply VB encoding to postings list, then write to file
-        posting_file.write(vb.encode([int(num) for num in postings.split()[1:]]))
+        bpf.write(vb.encode([int(num) for num in postings.split()[1:]]))
 
         # ADD TO BLOCK MAP
         if term in block_map:
@@ -164,22 +164,23 @@ def write_block(block_id, doc_id_map, block_map, lengths_map):
         else:
             block_map[term] = [(block_id, dict_seek_ptr)]
 
-        posting_bytes_to_read = posting_file.tell() - posting_seek_ptr
-        config.dict_file.write(term + ' ' + str(posting_seek_ptr) + ' ' + str(posting_bytes_to_read) + ' ' + str(df) + '\n')
-        posting_seek_ptr = posting_file.tell()
+        posting_bytes_to_read = bpf.tell() - posting_seek_ptr
+        bdf.write(term + ' ' + str(posting_seek_ptr) + ' ' + str(posting_bytes_to_read) + ' ' + str(df) + '\n')
+        posting_seek_ptr = bpf.tell()
 
-        dict_seek_ptr = config.dict_file.tell()
+        dict_seek_ptr = bdf.tell()
 
     for doc_id in doc_id_map:
         lengths_map[doc_id] = doc_id_map[doc_id][1]
 
-    posting_file.close()
-    config.dict_file.close()
+    bpf.close()
+    bdf.close()
 
 
 def merge_blocks(block_map, lengths_map):
+    print
     mdf = open(config.dict_file, 'w')
-    mpf = open(posting_file, 'wb')
+    mpf = open(config.postings_file, 'wb')
     mlf = open(config.lengths_file, 'w')
     mpf_seek_ptr = 0
 
