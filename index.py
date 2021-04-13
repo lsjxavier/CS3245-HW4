@@ -36,14 +36,14 @@ def build_index(in_data, out_dict, out_postings):
     doc_counter = 0            # Counter for block separation
 
     csvfile = open(in_data, 'r', encoding='utf-8')
-    csvdata = csv.DictReader(csvfile, delimiter=',', quotechar='"')
+    csvdata = csv.DictReader(csvfile, delimiter=',', quotechar='\"')
     # Columns: 'document_id', 'title', 'content', 'date_posted', 'court''
 
     for row in csvdata:
         doc_counter += 1
 
-        doc_id = row['document_id']
-        content = row['content']
+        doc_id = row["document_id"]
+        content = row["content"]
 
         print('Processing document', doc_id)
         language_operations.process_document(doc_id, content, term_map, lengths_map)

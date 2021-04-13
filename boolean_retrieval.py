@@ -55,18 +55,6 @@ def index_elimination(token, dictionary, N):
     pl = remove_low_idf(token, dictionary, N)
     return list(pl.keys())
 
-
-def remove_scattered_term_pos(result):
-    # for each document, get the term positions of each query term
-    # if less than 50% of terms appear in document, remove document from result
-    
-    # bring all term positions into a single list, then create a new list containing the difference in positions
-    # if no position difference is < 10, remove document from result
-
-    # return result
-
-    # TO DO
-
 # ========================================================================
 # SHUNTING YARD ALGORITHM AND EVALUATION
 
