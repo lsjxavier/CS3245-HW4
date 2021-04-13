@@ -24,7 +24,7 @@ def build_index(in_data, out_dict, out_postings):
     # This is an empty method
     # Pls implement your code in below
 
-    start = time.process_time()
+    indexing_start_time = time.process_time()
     file_operations.init_indexing(out_dict, out_postings)
 
     doc_id_map = {}      # The initial dictionary containing doc_id - term mappings
@@ -72,7 +72,11 @@ def build_index(in_data, out_dict, out_postings):
     file_operations.flush_temp_dirs()
 
     print('===================================')
-    print('Time Elapsed: ' + str(time.process_time() - start) + 's')
+    indexing_end_time = time.process_time()
+    indexing_time_elapsed = indexing_end_time - indexing_start_time
+    with open('indexing_log.txt', 'w') as f: f.write(str(indexing_time_elapsed) + '\n')
+    print('Time Elapsed: ' + str(indexing_time_elapsed) + 's')
+
 
 # ============================================================================
 
