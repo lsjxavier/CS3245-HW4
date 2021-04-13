@@ -3,6 +3,7 @@ import os
 import vbcode as vb
 
 import config
+import language_operations
 
 
 WORKING_DIR = os.getcwd()
@@ -33,12 +34,11 @@ def init_search(dict_file, postings_file, queries_file, results_file):
 
 def load_dictionary():
     dictionary = {} # <term>: <seek ptr to posting> <bytes_to_read> <doc freq>
-    df = open(config.dict_file, 'r')
-    for li in df:
-        line = li.strip().split()
-        
-        dictionary[line[0]] = [int(line[1]), int(line[2]), int(line[3])]
-    df.close()
+    with open(config.dict_file, 'r') as df:
+        for li in df:
+            line = li.strip().split()
+            
+            dictionary[line[0]] = [int(line[1]), int(line[2]), int(line[3])]
     return dictionary
 
 
@@ -114,8 +114,9 @@ def write_results(sorted_scores):
     rf.close()
 
 
-def write_block(block_id, term_map, block_map, lengths_map):
+def write_block(block_id, doc_id_map, block_map, lengths_map):
     print('Writing block', block_id)
+    term_map = language_operations.get_term_postings(doc_id_map) # The final dictionary containing term - doc_id mappings
 
     block_dict = os.path.join(TMP_DICT_DIR, str(block_id) + FILE_EXT)
     block_postings = os.path.join(TMP_POST_DIR, str(block_id) + FILE_EXT)
@@ -125,7 +126,14 @@ def write_block(block_id, term_map, block_map, lengths_map):
     # V: Element 0: df
     #    Element 1:
     #        [  Element 0: doc_id
-    #           Element 1: (tf, [pos_idx])  ]
+    #           Element 1: (tf, [pos_idx])  ]  # <= CHANGED
+
+    # doc_id_map:
+    #     K: doc_id
+    #     V: doc_id_tuple:
+    #         Element 0: dict -> K: term 
+    #                            V: (tf, [pos_idx])  # <= CHANGED
+    #         Element 1: doc_length_squared
 
     posting_seek_ptr = 0 # to be written to dict file
     dict_seek_ptr = 0 # to be written to block mapping
@@ -161,6 +169,9 @@ def write_block(block_id, term_map, block_map, lengths_map):
         posting_seek_ptr = bpf.tell()
 
         dict_seek_ptr = bdf.tell()
+
+    for doc_id in doc_id_map:
+        lengths_map[doc_id] = doc_id_map[doc_id][1]
 
     bpf.close()
     bdf.close()
