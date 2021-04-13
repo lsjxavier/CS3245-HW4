@@ -31,7 +31,7 @@ def build_index(in_data, out_dict, out_postings):
     block_map = {}       # Contains term - block_id mappings for merging
     lengths_map = {}     # Contains doc_id - doc_length mappings
 
-    block_size = 250     # Maximum number of documents to store in each block
+    block_size = 500     # Maximum number of documents to store in each block
     block_id = 1         # ID of current block
     doc_counter = 0      # Counter for block separation
 
@@ -56,7 +56,7 @@ def build_index(in_data, out_dict, out_postings):
             doc_id_map = {}
 
         # FOR DEBUGGING PURPOSES: RETURN A SMALL SUBSET OF THE COLLECTION
-        # if block_id == 3: break
+        if block_id == 3: break
 
     csvfile.close()
 
