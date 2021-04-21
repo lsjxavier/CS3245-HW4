@@ -2,7 +2,7 @@ import os
 
 import vbcode as vb
 
-import config
+import filenames
 import language_operations
 
 
@@ -19,22 +19,22 @@ if not os.path.exists(TMP_POST_DIR): os.mkdir(TMP_POST_DIR)
 
 
 def init_indexing(out_dict, out_post):
-    config.dict_file = out_dict
-    config.postings_file = out_post
-    config.lengths_file = 'lengths.txt'
+    filenames.dict_file = out_dict
+    filenames.postings_file = out_post
+    filenames.lengths_file = 'lengths.txt'
 
 
 def init_search(dict_file, postings_file, queries_file, results_file):
-    config.dict_file = dict_file
-    config.postings_file = postings_file
-    config.lengths_file = 'lengths.txt'
-    config.query_file = queries_file
-    config.results_file = results_file
+    filenames.dict_file = dict_file
+    filenames.postings_file = postings_file
+    filenames.lengths_file = 'lengths.txt'
+    filenames.query_file = queries_file
+    filenames.results_file = results_file
 
 
 def load_dictionary():
     dictionary = {} # <term>: <seek ptr to posting> <bytes_to_read> <doc freq>
-    with open(config.dict_file, 'r') as df:
+    with open(filenames.dict_file, 'r') as df:
         for li in df:
             line = li.strip().split()
             
@@ -45,7 +45,7 @@ def load_dictionary():
 def load_doc_lengths():
     lengths = {} # <doc id> <doc lengths squared>
     N = 0
-    lf = open(config.lengths_file, 'r')
+    lf = open(filenames.lengths_file, 'r')
     for li in lf:
         line = li.strip().split()
         if len(line) == 1: N = int(line[0])
@@ -57,7 +57,7 @@ def load_doc_lengths():
 
 def read_query_file():
     valid_docs = []
-    qf = open(config.query_file, 'r')
+    qf = open(filenames.query_file, 'r')
     q = [(line.strip()) for line in qf]
     qf.close()
 
@@ -70,7 +70,8 @@ def read_query_file():
 def retrieve_posting_list(term, dictionary):
     # dictionary[term] : [seek_ptr, bytes_to_read, df]
     # postings file e.g. : [246391, 1, 30, 1587517, 1, 33, 1587784, 1, 34, 1620199, 2, 22551, 23322, 2125001, 2, 20, 119, 2125230, 2, 12, 97]
-    pf = open(config.postings_file, 'rb')
+    
+    pf = open(filenames.postings_file, 'rb')
 
     postings = {}
     # A dictionary structure for the postings.
@@ -108,9 +109,8 @@ def retrieve_posting_list(term, dictionary):
 
 
 def write_results(sorted_scores):
-    rf = open(config.results_file, 'w')
-    for doc_id, score in sorted_scores:
-        rf.write(str(doc_id) + ' ' + str(score) + '\n')
+    rf = open(filenames.results_file, 'w')
+    rf.write(' '.join([str(doc_id) for doc_id, score in sorted_scores]))
     rf.close()
 
 
@@ -170,7 +170,7 @@ def write_block(block_id, doc_id_map, block_map, lengths_map):
 
         dict_seek_ptr = bdf.tell()
 
-    for doc_id in doc_id_map:
+    for doc_id in sorted(doc_id_map):
         lengths_map[doc_id] = doc_id_map[doc_id][1]
 
     bpf.close()
@@ -178,10 +178,10 @@ def write_block(block_id, doc_id_map, block_map, lengths_map):
 
 
 def merge_blocks(block_map, lengths_map):
-    print
-    mdf = open(config.dict_file, 'w')
-    mpf = open(config.postings_file, 'wb')
-    mlf = open(config.lengths_file, 'w')
+    print('Merging blocks...')
+    mdf = open(filenames.dict_file, 'w')
+    mpf = open(filenames.postings_file, 'wb')
+    mlf = open(filenames.lengths_file, 'w')
     mpf_seek_ptr = 0
 
     for term in block_map:
@@ -230,7 +230,7 @@ def merge_blocks(block_map, lengths_map):
 
 def flush_temp_dirs():
     for f in os.listdir(TMP_DICT_DIR): os.remove(os.path.join(TMP_DICT_DIR, f))
-    for f in os.listdir(TMP_POST_DIR): os.remove(os.path.join(TMP_POST_DIR, f))
     os.rmdir(TMP_DICT_DIR)
+    for f in os.listdir(TMP_POST_DIR): os.remove(os.path.join(TMP_POST_DIR, f))
     os.rmdir(TMP_POST_DIR)
     os.rmdir(TMP_DIR)

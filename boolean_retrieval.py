@@ -41,7 +41,7 @@ def remove_low_idf(token, dictionary, N):
     pl = {}
     if token in dictionary:
         # term_idf = vsm.compute_idf(N, dictionary[token][2])
-        # if term_idf > 0.4: # Accept term if its df is at most 2/5th of collection size
+        # Accept term if its df is at most 2/5th of collection size
         #     pl = file_operations.retrieve_posting_list(token, dictionary)
         
         term_df = dictionary[token][2]
@@ -54,17 +54,29 @@ def remove_low_idf(token, dictionary, N):
 def index_elimination(token, dictionary, N):
     pl = remove_low_idf(token, dictionary, N)
     return list(pl.keys())
-ss
-def remove_scattered_term_pos(result):
-    # for each document, get the term positions of each query term
-    # if less than 50% of terms appear in document, remove document
 
-    # bring all term positions into a single list, then create a new list
-    # if no position difference is < 10, remove document from result
 
-    # return result
+# Remove documents if terms do not appear close together.
+# def remove_scattered_term_pos(result, dictionary, vsm_query):
+#     if len(result) == 1: return result
 
-    # TO DO
+#     keepable_docs = []
+#     for doc_id in result:
+#         term_count = 0
+#         pos_li = []
+#         for term in vsm_query:
+#             term_post = file_operations.retrieve_posting_list(term, dictionary)
+
+#             if doc_id in term_post:
+#                 pos_li += term_post[doc_id]
+
+#         pos_li.sort()
+#         for i in range(0, len(pos_li) - 1):
+#             if pos_li[i + 1] - pos_li[i] < 5:
+#                 keepable_docs.append(doc_id)
+#                 break
+#     return keepable_docs
+
 
 # ========================================================================
 # SHUNTING YARD ALGORITHM AND EVALUATION
@@ -110,7 +122,7 @@ def create_rpn(tokens):
     return rpn
 
 
-def eval_rpn(rpn, dictionary, N):
+def eval_rpn(rpn, dictionary, N, vsm_query):
     eval_stack = []
     while rpn:
         token = rpn.pop(0)
@@ -147,7 +159,7 @@ def eval_rpn(rpn, dictionary, N):
                 # Returns a list of documents containing all terms in the phrase,
                 # without considering position first.
                 # phrase_result = eval_rpn(phrase_rpn, dictionary, postings_file, N)
-                phrase_result = eval_rpn(phrase_rpn, dictionary, N)
+                phrase_result = eval_rpn(phrase_rpn, dictionary, N, vsm_query)
 
                 result = []
 
@@ -167,8 +179,6 @@ def eval_rpn(rpn, dictionary, N):
                             position_intersect = list_operations.intersect(position_intersect, phrase_postings[term][doc_id])
                     if position_intersect: result.append(doc_id)
                 
-                # ADD TO DICTIONARY?
-                # ADD TO POSTINGS?
                     
                 eval_stack.append(result)
 
@@ -206,11 +216,17 @@ def eval_rpn(rpn, dictionary, N):
             else:
                 right = right_term
 
+            # Refine query result further by removing documents with terms
+            # not close together.
+            # left = remove_scattered_term_pos(left, dictionary, vsm_query)
+            # right = remove_scattered_term_pos(right, dictionary, vsm_query)
+
             eval_stack.append(list_operations.union(left, right))
-            
+
         else:
             pl = index_elimination(token, dictionary, N)
             eval_stack.append(pl)
 
     output = eval_stack.pop()
+
     return output

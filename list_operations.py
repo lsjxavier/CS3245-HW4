@@ -123,10 +123,4 @@ def subtract(x, y):
     
     result = a_posting
     
-    if result:
-        result_skip_ptrs = create_skip_ptrs(result)
-        result_len = len(result)
-        result.insert(0, result_len)
-        result += result_skip_ptrs
-
     return result

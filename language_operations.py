@@ -24,14 +24,14 @@ def process_document(doc_id, content):
     for sentence in sentences:
         tokens = word_tokenize(sentence)
         for token in tokens:
-                term = stemmer.stem(token.lower())
-                if term in doc_terms[0]:
-                    doc_terms[0][term][0] += 1
-                    doc_terms[0][term][1].append(position_idx)
-                else:
-                    doc_terms[0][term] = [1, [position_idx]]
+            term = stemmer.stem(token.lower())
+            if term in doc_terms[0]:
+                doc_terms[0][term][0] += 1
+                doc_terms[0][term][1].append(position_idx)
+            else:
+                doc_terms[0][term] = [1, [position_idx]]
 
-                position_idx += 1
+            position_idx += 1
     
     doc_terms[1] = vsm.compute_length_squared([vsm.compute_log_term_freq(val[0]) for val in doc_terms[0].values()])
     return doc_terms
@@ -49,7 +49,7 @@ def get_term_postings(doc_id_map):
     #        [  Element 0: doc_id
     #           Element 1: (tf, [pos_idx]) ]
     
-    for doc_id in doc_id_map:
+    for doc_id in sorted(doc_id_map): # doc_id_map is now unsorted due to parallelization
         doc_id_tuple = doc_id_map[doc_id]
         # doc_id_tuple:
         #     Element 0: dict -> K: term 
@@ -158,3 +158,15 @@ def parse_query(string, dictionary):
 
     return(boolean_query, vsm_query)
 
+def calculate_doc_score(doc_id, doc_lengths, dictionary, query_wt, query_length_sqr, vsm_query):
+    print('Calculating score for document', doc_id)
+    doc_length_sqr = doc_lengths[doc_id]  # returns -> doc_length_sqr
+
+    term_scores = {term: vsm.get_term_score(dictionary, doc_id, term, doc_length_sqr, query_wt, query_length_sqr)
+                    for term in vsm_query}
+    # returns -> {<term> <score>}
+
+    # Accumulates the scores on a term basis - see general notes in README.txt 
+    this_score = (sum(term_scores[term] for term in term_scores)) ** 2 * float(doc_length_sqr) * float(
+        query_length_sqr)
+    return (int(doc_id), this_score)

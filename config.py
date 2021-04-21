@@ -1,6 +1,2 @@
-# FILES
-dict_file = ''
-postings_file = ''
-lengths_file = 'lengths.txt'
-query_file = ''
-results_file = ''
+SPIMI_BLOCK_SIZE = 256     # Maximum number of documents to store in each block
+NUM_WORKER_PROCESSES = 4

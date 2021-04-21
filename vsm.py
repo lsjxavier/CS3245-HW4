@@ -18,7 +18,7 @@ def compute_term_score(doc_wt, doc_length_sqr, query_wt, query_length_sqr):
     return ((doc_wt * query_wt) / (doc_length_sqr * query_length_sqr)) if (doc_length_sqr != 0 and query_length_sqr != 0) else 0
 
 
-def create_query_vector(query_array, valid_docs, dictionary, N):
+def create_query_vector(query_array, dictionary, N):
     query_tf_dict = {}
     query_idf_dict = {}
 
