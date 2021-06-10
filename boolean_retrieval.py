@@ -34,18 +34,11 @@ def is_term(string):
 # INDEX ELIMINATION METHODS
 
 def remove_low_idf(token, dictionary, N):
-    # If a term has low_idf, remove from query.
-
-    # What if original query is boolean query?
-
     pl = {}
     if token in dictionary:
-        # term_idf = vsm.compute_idf(N, dictionary[token][2])
-        # Accept term if its df is at most 2/5th of collection size
-        #     pl = file_operations.retrieve_posting_list(token, dictionary)
-        
+
         term_df = dictionary[token][2]
-        if (term_df / N < 0.4):
+        if (term_df / N < 0.4): # low idf <-> high df/N
             pl = file_operations.retrieve_posting_list(token, dictionary)
 
     return pl
@@ -54,28 +47,6 @@ def remove_low_idf(token, dictionary, N):
 def index_elimination(token, dictionary, N):
     pl = remove_low_idf(token, dictionary, N)
     return list(pl.keys())
-
-
-# Remove documents if terms do not appear close together.
-# def remove_scattered_term_pos(result, dictionary, vsm_query):
-#     if len(result) == 1: return result
-
-#     keepable_docs = []
-#     for doc_id in result:
-#         term_count = 0
-#         pos_li = []
-#         for term in vsm_query:
-#             term_post = file_operations.retrieve_posting_list(term, dictionary)
-
-#             if doc_id in term_post:
-#                 pos_li += term_post[doc_id]
-
-#         pos_li.sort()
-#         for i in range(0, len(pos_li) - 1):
-#             if pos_li[i + 1] - pos_li[i] < 5:
-#                 keepable_docs.append(doc_id)
-#                 break
-#     return keepable_docs
 
 
 # ========================================================================
@@ -215,11 +186,6 @@ def eval_rpn(rpn, dictionary, N, vsm_query):
                 right = index_elimination(right_term, dictionary, N)
             else:
                 right = right_term
-
-            # Refine query result further by removing documents with terms
-            # not close together.
-            # left = remove_scattered_term_pos(left, dictionary, vsm_query)
-            # right = remove_scattered_term_pos(right, dictionary, vsm_query)
 
             eval_stack.append(list_operations.union(left, right))
 

@@ -26,7 +26,7 @@ def usage():
 
 
 if __name__ == '__main__':
-    # ============================================================================
+    # ===================================================
     dict_file = postings_file = queries_file = results_file = None
     # ===================================================
     # DEBUG
@@ -59,9 +59,6 @@ if __name__ == '__main__':
         usage()
         sys.exit(2)
 
-
-
-# if __name__ == '__main__':
     """
     using the given dictionary file and postings file,
     perform searching on the given queries file and output the results to a file
@@ -126,7 +123,8 @@ if __name__ == '__main__':
         # Now cleanup and sort scores
 
         for doc_id in relevant_docs:
-            relevant_document_scores.append(language_operations.calculate_doc_score(doc_id, doc_lengths, dictionary, query_wt, query_length_sqr, vsm_query))
+            relevant_document_scores.append(
+                language_operations.calculate_doc_score(doc_id, doc_lengths, dictionary, query_wt, query_length_sqr, vsm_query))
 
         boolean_document_sorted_scores = sorted(boolean_document_scores, key=lambda x: (-x[1], x[0]))
         document_scores = relevant_document_scores + boolean_document_sorted_scores

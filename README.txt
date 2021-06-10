@@ -16,43 +16,40 @@ Framework:
     2. Split the iterator into blocks
     3. For each block:
         - Split block into x slices, where x is the number of worker processes
-        - Each worker condenses the documents in their own slice
+        - Each worker condenses the documents within their own slice
         - Once all workers are done, they consolidate their condensed document
           mappings and pass to the writers to create:
             - Postings file with Variable-byte (VB) encoding
             - Dictionary file with pointers on where to read from the postings
             - Lengths file containing the collection size and document lengths
-    4. When all blocks are written, merge all the blocks by term
+    4. When all blocks are written, merge all the blocks by terms
 
 The details:
 -   The same process as HW3 is used, where each document is condensed into a dict
     structure with terms, their frequencies (tf) as well as an array of their
-    positions. This is used as the base to derived 3 structures:
+    positions. This is used as the base to derived the 3 structures needed:
       - Posting file: doc_id, term_frequency, [positional indices]
       - Dictionary file: term, posting seek pointer, no. of bytes to read,
         document_frequency
       - Lengths file: doc_id, document_length (and collection size included
         in the header)
 
--   Due to the large collection size of over 17k documents, SPIMI is also
+-   Due to the large collection size of over 17,000 documents, SPIMI is also
     introduced during indexing in the same style as HW2, where a term - block_id
-    mapping is created while writing the blocks, then terms are merged across
-    blocks that the term appears in.
-
--   Multiprocessing was also implemented in the processing stage which decreased
-    indexing time, but at the cost of higher memory consumption. Smaller block
-    sizes were therefore used.
+    mapping is maintained while writing the blocks, then terms are merged across
+    blocks that the term appears in. Multiprocessing was also implemented within
+    each block during document processing, which decreased indexing time, but at
+    the cost of slightly higher memory consumption. Smaller block sizes were
+    therefore used (maximum 256 documents per block).
 
 -   Variable-byte encoding was chosen to compress the postings list as it is
     not as expensive to decode as gamma encoding, although the resultant
     file size would be slightly larger. In addition, it was performed during
-    writing of individual blocks, so that the merging stage is just a simple
-    appending of byte strings, and is less memory exhaustive.
+    writing of individual blocks rather than at the merging stage, so that the
+    merging stage is just a simple appending of byte strings, and is less
+    memory exhaustive than reading in the uncompressed postings for each term
+    into memory.
 
-    Only the postings list was compressed as its original size was around 700 MB,
-    which was reduced to around 300 MB after VB encoding. No compression on
-    the dictionary and lengths files were performed as they were only around
-    3 MB and 0.4 MB large respectively. 
 
 SEARCHING:
 
@@ -102,13 +99,12 @@ The details:
     which evaluates to the square of the score as computed by the original
     formula. There were two motivations behind this: to avoid the expensive
     computation of square roots during indexing and searching, as well as easier
-    score computation on a per term basis. 
+    score computation on a per term basis (qi * di).
 
 -   Due to the potentially large number of results that may be returned, multiprocessing
     techniques were used to parallelize the computation of the scores. The list is
-    split into 4 parts for 4 workers, where each worker calculates the scores and
-    writes to a temporary file. Once all 10 workers are done, the scores are read
-    back in and sorted.
+    split into 4 parts for 4 workers, where each worker calculates and returns the
+    scores.
 
 
 
@@ -206,7 +202,7 @@ assignment and state their role>
    https://pymotw.com/2/multiprocessing/basics.html
    https://docs.python.org/3/library/multiprocessing.html#sharing-state-between-processes
 
-4: Misc new pythonic tricks adapted as part of cleaning up undesirable code structures from
+4: Misc pythonic tricks adapted as part of cleaning up messy code structures from
    previous assignments:
    
    a. Splitting list into a specific number of parts:
@@ -215,3 +211,5 @@ assignment and state their role>
    b. Slicing an iterator:
    https://stackoverflow.com/questions/1915170/split-a-generator-iterable-every-n-items-in-python-splitevery
 
+   c. Using regex to remove special characters
+   https://stackoverflow.com/questions/6323296/python-remove-anything-that-is-not-a-letter-or-number

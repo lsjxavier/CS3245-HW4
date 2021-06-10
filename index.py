@@ -29,7 +29,7 @@ def process_block(doc_id_map, mini_block):
 
 
 if __name__ == '__main__':
-    # ============================================================================
+    # ===================================================
     in_data = out_dict = out_postings = None
     # ===================================================
     # DEBUG
@@ -119,5 +119,4 @@ if __name__ == '__main__':
     print('===================================')
     indexing_end_time = time.perf_counter()
     indexing_time_elapsed = indexing_end_time - indexing_start_time
-    with open('indexing_log.txt', 'w') as f: f.write(str(indexing_time_elapsed) + '\n')
     print('Time Elapsed: ' + str(indexing_time_elapsed) + 's')

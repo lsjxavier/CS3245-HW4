@@ -166,7 +166,7 @@ def calculate_doc_score(doc_id, doc_lengths, dictionary, query_wt, query_length_
                     for term in vsm_query}
     # returns -> {<term> <score>}
 
-    # Accumulates the scores on a term basis - see general notes in README.txt 
-    this_score = (sum(term_scores[term] for term in term_scores)) ** 2 * float(doc_length_sqr) * float(
-        query_length_sqr)
+    # Accumulates the squared lnc-ltc score on a term basis - see general notes in README.txt 
+    this_score = (sum(term_scores[term] for term in term_scores)) ** 2 * float(doc_length_sqr) * float(query_length_sqr)
+
     return (int(doc_id), this_score)

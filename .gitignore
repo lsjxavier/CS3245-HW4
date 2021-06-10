@@ -32,3 +32,7 @@ old/__pycache__/language_operations.cpython-39.pyc
 old/__pycache__/list_operations.cpython-39.pyc
 old/__pycache__/vbcode.cpython-39.pyc
 old/__pycache__/vsm.cpython-39.pyc
+output-test2.txt
+queries/q1.txt
+queries/q2.txt
+queries/q3.txt
